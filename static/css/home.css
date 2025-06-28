@@ -1,0 +1,63 @@
+/* h1 {
+	background-color: beige;
+	widt
+} */
+
+body {
+	background-image: url("../background1.jpeg");
+	background-color: #cccccc;
+   }
+
+.links, h1, h2 {
+	background-color: beige;
+	width: fit-content;
+	padding: 5px;
+}
+
+.container {
+	background-color: beige;
+
+	float: right;;
+}
+
+.container > * {
+	display: block;
+}
+
+.searchbox {
+	margin-right: 5pc;
+	text-align: c;
+	/* margin-left: auto;
+	margin-right: auto; */
+	width: fit-content;
+	margin-right: auto;
+	margin-left: auto;
+	background-color: beige;
+	padding: 10px;
+}
+
+.searchbox .searchbar {
+	/* width: 30pc; */
+	height: 20px;
+}
+
+.promo {
+	width: fit-content;
+
+}
+
+.promo div {
+	border: solid;
+	margin: 10px;
+	padding: 10px;
+}
+
+a {
+	display: block;
+	margin: 5px;
+	width: fit-content;
+}
+
+input {
+	display: block;
+}

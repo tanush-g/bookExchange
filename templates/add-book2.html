@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+	<h1>Add Book2</h1>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+</head>
+<body>
+	<h3>Please select your book if it is from the following</h3>
+	<br>
+	{% if transaction_type == 'lend' %}
+		<p>lend</p>
+	{% elif transaction_type == 'sell' %}
+		<p>sell</p>
+	{% elif transaction_type == 'exchange' %}
+		<p>exchange</p>
+	{% endif %}
+
+	<form action="{{ url_for('add_book2', transaction_type = transaction_type) }}" method="POST">
+		{% for book in similar_books %}
+			<input type="radio" name="book" value="{{ book['unique_id'] }}"required>
+			<label for="{{ book['uinque_id'] }}">{{ book['name'] }}</label>
+			<br>
+		{% endfor %}
+		<input type="radio" name="book" id="none" value="none" required>
+		<label for="none">None of the above</label>
+		<br>
+		<br>
+		<div style="display: none;" class="genres">
+			<h4>Add upto 3 genres</h4>
+			<label for="">Genre 1</label>
+			<input type="text" name="genre1" id="">
+			<br>
+			<label for="">Genre 2</label>
+			<input type="text" name="genre2" id="">
+			<br>
+			<label for="">Genre 3</label>
+			<input type="text" name="genre3" id="">
+		</div>
+		<br>
+		<button type="submit">Proceed</button>
+	</form>
+	<script src="../static/add-book2.js"></script>
+</body>
+</html>
