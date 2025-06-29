@@ -1,16 +1,5 @@
 console.log("Hello World")
 
-let formbtn = document.querySelector("button");
-let textfields = document.querySelectorAll(".textfield");
-
-console.log(textfields);
-
-formbtn.addEventListener("click", (e) => {
-	textfields.forEach((textfield) => {
-		textfield.value = textfield.value.replace("'", "''");
-	});
-});
-
 ///////////////////////
 
 let lendRadio = document.getElementById("lend")
