@@ -8,10 +8,10 @@ bcrypt==4.3.0
 
 # Security Dependencies
 bcrypt==4.0.1
-cryptography==41.0.7
+cryptography==44.0.1
 
 # Production Dependencies
-gunicorn==21.2.0
+gunicorn==23.0.0
 python-dotenv==1.0.0
 
 # Development Dependencies (optional)
