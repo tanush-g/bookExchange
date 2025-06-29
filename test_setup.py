@@ -1,21 +1,28 @@
 #!/usr/bin/env python3
 """
-Test script to verify the Flask application setup
+Test script to verify MySQL connection and database setup
 """
 import sys
 import os
-
-# Add current directory to path to import config
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 try:
     import config
-    print("✅ Config imported successfully")
-    print(f"   Database: {config.MYSQL_DB}")
+    print("✅ Config module imported successfully")
     print(f"   Host: {config.MYSQL_HOST}")
     print(f"   User: {config.MYSQL_USER}")
-    
-    # Test database connection
+    print(f"   Database: {config.MYSQL_DB}")
+    print(f"   Password set: {'Yes' if config.MYSQL_PASSWORD else 'No - PLEASE SET YOUR MYSQL PASSWORD'}")
+except Exception as e:
+    print(f"❌ Error importing config: {e}")
+    sys.exit(1)
+
+if not config.MYSQL_PASSWORD:
+    print("\n🚨 IMPORTANT: Please set your MySQL password in config.py before running the app!")
+    print("   Update the MYSQL_PASSWORD variable with your MySQL root password.")
+    sys.exit(1)
+
+try:
     from flask import Flask
     from flask_mysqldb import MySQL
     
@@ -39,9 +46,9 @@ try:
         # Test unique_books table
         cur.execute("SELECT name, author FROM unique_books LIMIT 3")
         books = cur.fetchall()
-        print(f"✅ Sample books:")
+        print("✅ Sample books:")
         for book in books:
-            print(f"   - {book['name']} by {book['author']}")
+            print(f" - {book['name']} by {book['author']}")
         
         # Test genres
         cur.execute("SELECT COUNT(*) as count FROM genre")
@@ -50,11 +57,11 @@ try:
         
         cur.close()
         print("\n🎉 All systems ready! Your Flask app should work perfectly.")
-        
+
 except Exception as e:
-    print(f"❌ Error: {e}")
+    print(f"❌ Database connection failed: {e}")
     print("\nPlease check:")
     print("1. MySQL is running")
-    print("2. Database 'bookexchange' exists")
-    print("3. Your MySQL password is correct in config.py")
+    print("2. Your password is correct in config.py")
+    print("3. The 'bookexchange' database exists")
     sys.exit(1)

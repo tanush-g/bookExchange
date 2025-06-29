@@ -13,23 +13,10 @@ formbtn.addEventListener("click", (e) => {
 
 ///////////////////////
 
-let exchangeRadio = document.getElementById("exchange")
 let lendRadio = document.getElementById("lend")
 let sellRadio = document.getElementById("sell")
+let exchangeRadio = document.getElementById("exchange")
 
-
-exchangeRadio.addEventListener("click", function() {
-	if (exchangeRadio.checked) {
-		console.log(exchangeRadio.value)
-		// lendRadio.style.display = "none";
-
-		document.querySelector(".price").innerHTML = "";
-
-		document.querySelector(".num-of-days").innerHTML = "";
-
-		document.querySelector(".exchange-description").innerHTML = '<label for="exchange-description"><b>Tell us briefly about the condition of the book and what you want to exchange it for</b></label> <input type="text" placeholder="Enter description" name="exchange-description" required> <br>';
-	}
-});
 
 lendRadio.addEventListener("click", function() {
 	if (lendRadio.checked) {
@@ -44,7 +31,7 @@ lendRadio.addEventListener("click", function() {
 
 });
 
-sell.addEventListener("click", function() {
+sellRadio.addEventListener("click", function() {
 	console.log("clicked on sell");
 	
 
@@ -58,4 +45,17 @@ sell.addEventListener("click", function() {
 
 	document.querySelector(".exchange-description").innerHTML = "";
 
+});
+
+exchangeRadio.addEventListener("click", function() {
+	if (exchangeRadio.checked) {
+		console.log(exchangeRadio.value)
+		// lendRadio.style.display = "none";
+
+		document.querySelector(".price").innerHTML = "";
+
+		document.querySelector(".num-of-days").innerHTML = "";
+
+		document.querySelector(".exchange-description").innerHTML = '<label for="exchange-description"><b>Tell us briefly about the condition of the book and what you want to exchange it for</b></label> <input type="text" placeholder="Enter description" name="exchange-description" required> <br>';
+	}
 });

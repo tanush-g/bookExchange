@@ -4,10 +4,8 @@ from difflib import SequenceMatcher
 import config
 
 import io
-import random
 from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
 from figure import create_figure
 
 app = Flask(__name__)
@@ -143,7 +141,7 @@ def search():
 
 	if True:
 		name = name.lower().strip()
-		suthor = author.lower().strip()
+		author = author.lower().strip()
 		genre = genre.lower().strip()
 
 		if len(genre) == 0:
@@ -243,18 +241,25 @@ def ubook_page(unique_id, ttype = None):
 		all_books[i].update(user)
 
 		if all_books[i]['transaction_type'] == 1:
-			cmd = f"SELECT * FROM available_for_exchange WHERE book_id = {all_books[i]['book_id']}"
-		
-		if all_books[i]['transaction_type'] == 2:
 			cmd = f"SELECT * FROM available_for_borrowing WHERE book_id = {all_books[i]['book_id']}"
-
-		if all_books[i]['transaction_type'] == 3:
+		
+		elif all_books[i]['transaction_type'] == 2:
 			cmd = f"SELECT * FROM available_for_buying WHERE book_id = {all_books[i]['book_id']}"
+
+		elif all_books[i]['transaction_type'] == 3:
+			cmd = f"SELECT * FROM available_for_exchange WHERE book_id = {all_books[i]['book_id']}"
+		else:
+			details = {}
+			all_books[i].update(details)
+			continue
 
 		cur.execute(cmd)
 		details = cur.fetchone()
 		print("dets:", details)
-		all_books[i].update(details)
+		if details is not None:
+			all_books[i].update(details)
+		else:
+			print(f"Warning: No transaction details found for book_id {all_books[i]['book_id']} with transaction_type {all_books[i]['transaction_type']}")
 
 	return render_template('ubook_page.html', unique_book = unique_book, all_books = all_books, user_types = user_types)
 
@@ -322,8 +327,12 @@ def preferences(todo = None, genre = None):
 
 		print(preferred_genres)	
 
-		for genre in preferred_genres:
-			available_genres.remove(genre)
+		# Create a set of preferred genre names for faster lookup
+		preferred_genre_names = {genre['genre_name'] for genre in preferred_genres}
+		
+		# Filter out preferred genres from available genres
+		available_genres = [genre for genre in available_genres 
+						   if genre['genre_name'] not in preferred_genre_names]
 
 		print(available_genres)
 
@@ -451,24 +460,21 @@ def add_book2(transaction_type):
 		# add to corresponding transaction_type table
 
 		if transaction_type == '1':
-			# cur.execute("SELECT MAX(book_id) FROM available_for_exchange")
-			# maxid = cur.fetchone()
-			print('session', session)
-			cmd = f"INSERT INTO available_for_exchange VALUES ({max_bid}, '{session['book_to_add']['exchange-description']}')"
-			print(cmd)
-			cur.execute(cmd)
-
-		elif transaction_type == '2':
-			# cur.execute("SELECT MAX(book_id) FROM available_for_borrowing")
-			# maxid = cur.fetchone()
+			# for borrowing/lending
 			cmd = f"INSERT INTO available_for_borrowing VALUES ({max_bid}, {session['book_to_add']['price']}, {session['book_to_add']['num-of-days']})"
 			print(cmd)
 			cur.execute(cmd)
 
-		elif transaction_type == '3':
-			# cur.execute("SELECT MAX(book_id) FROM available_for_buying")
-			# maxid = cur.fetchone()
+		elif transaction_type == '2':
+			# for buying/selling
 			cmd = f"INSERT INTO available_for_buying VALUES ({max_bid}, {session['book_to_add']['price']})"
+			print(cmd)
+			cur.execute(cmd)
+
+		elif transaction_type == '3':
+			# for exchange
+			print('session', session)
+			cmd = f"INSERT INTO available_for_exchange VALUES ({max_bid}, '{session['book_to_add']['exchange-description']}')"
 			print(cmd)
 			cur.execute(cmd)
 				
@@ -548,24 +554,28 @@ def my_books():
 
 		if book['transaction_type'] == 1:
 			print(book)
+			cmd = f"SELECT * FROM available_for_borrowing WHERE book_id = {book['book_id']}"
+			cur.execute(cmd)
+			lend_book = cur.fetchone()
+			print(lend_book)
+			if lend_book is not None:
+				book['price'] = lend_book['price']
+				book['num_of_days'] = lend_book['num_of_days']
+
+		elif book['transaction_type'] == 2:
+			cmd = f"SELECT * FROM available_for_buying WHERE book_id = {book['book_id']}"
+			cur.execute(cmd)
+			sell_book = cur.fetchone()
+			if sell_book is not None:
+				book['price'] = sell_book['price']
+
+		elif book['transaction_type'] == 3:
 			cmd = f"SELECT * FROM available_for_exchange WHERE book_id = {book['book_id']}"
 			cur.execute(cmd)
 			exchange_book = cur.fetchone()
 			print(exchange_book)
 			if exchange_book is not None:
 				book['exchange_with'] = exchange_book['exchange_with']
-
-		elif book['transaction_type'] == 2:
-			cmd = f"SELECT * FROM available_for_borrowing WHERE book_id = {book['book_id']}"
-			cur.execute(cmd)
-			lend_book = cur.fetchone()
-			if lend_book is not None:
-				book['price'] = lend_book['price']
-				book['num_of_days'] = lend_book['num_of_days']
-
-		elif book['transaction_type'] == 3:
-			cmd = f"SELECT * FROM available_for_buying WHERE book_id = {book['book_id']}"
-			cur.execute(cmd)
 			sell_book = cur.fetchone()
 			if sell_book is not None:
 				book['price'] = sell_book['price']
@@ -588,17 +598,17 @@ def edit_book(book_id):
 		cur.execute(cmd)
 
 		if request.form['transaction_type'] == '1':
-			cmd = f"UPDATE available_for_exchange SET exchange_with = '{request.form['exchange-description']}' WHERE book_id = {book_id};"
-			print(cmd)
-			cur.execute(cmd)
-		
-		elif request.form['transaction_type'] == '2':
 			cmd = f"UPDATE available_for_borrowing SET num_of_days = '{request.form['num_of_days']}', price = '{request.form['price']}' WHERE book_id = {book_id};"
 			print(cmd)
 			cur.execute(cmd)
 		
-		elif request.form['transaction_type'] == '3':
+		elif request.form['transaction_type'] == '2':
 			cmd = f"UPDATE available_for_buying SET price = '{request.form['price']}' WHERE book_id = {book_id};"
+			print(cmd)
+			cur.execute(cmd)
+		
+		elif request.form['transaction_type'] == '3':
+			cmd = f"UPDATE available_for_exchange SET exchange_with = '{request.form['exchange-description']}' WHERE book_id = {book_id};"
 			print(cmd)
 			cur.execute(cmd)
 
@@ -667,7 +677,7 @@ def delete_book(book_id):
 	except:
 		max_tid = 1
 
-	cmd = f"INSERT INTO archive VALUES ({max_tid}, {book_id}, {session['id']}, {book['transaction_type']})"
+	cmd = f"INSERT INTO archive VALUES ({max_tid}, {book['unique_id']}, {session['id']}, {book['transaction_type']})"
 	print(cmd)
 	cur.execute(cmd)
 
@@ -695,7 +705,11 @@ def plot_png():
 
 	try:
 		cur = mysql.connection.cursor()
-		cmd = f'''select temp.genre_name, temp.transaction_type, count(*) as Total_Books from(select genre_name, transaction_type from archive s, book_genre_relation t where s.unique_id = t.unique_id) as temp group by temp.genre_name, temp.transaction_type with rollup;'''
+		cmd = '''SELECT temp.genre_name, temp.transaction_type, COUNT(*) as Total_Books 
+				FROM (SELECT genre_name, transaction_type 
+					FROM archive s, book_genre_relation t 
+					WHERE s.unique_id = t.unique_id) as temp 
+				GROUP BY temp.genre_name, temp.transaction_type WITH ROLLUP;'''
 		cur.execute(cmd)
 		res = cur.fetchall()
 		print(res)
@@ -705,8 +719,9 @@ def plot_png():
 		FigureCanvas(fig).print_png(output)
 		return Response(output.getvalue(), mimetype='image/png')
 
-	except:
-		return redirect(url_for('success_page', msg = "Not enough data."))
+	except Exception as e:
+		print(f"Database error: {e}")  # Better error logging
+		return redirect(url_for('success_page', msg="Not enough data."))
 
 @app.route('/logout')
 def logout():
