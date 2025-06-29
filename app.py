@@ -485,7 +485,7 @@ def add_book2(transaction_type):
 			cur.execute(cmd)
 
 			if len(cur.fetchall()) == 0:					
-				cmd = f"INSERT INTO genre VALUES ('{request.form['genre1'].lower()}')"
+				cmd = f"INSERT INTO genre (genre_name, book_count) VALUES ('{request.form['genre1'].lower()}', 0)"
 				print(cmd)
 				cur.execute(cmd)
 
@@ -498,7 +498,7 @@ def add_book2(transaction_type):
 			cur.execute(cmd)
 			
 			if len(cur.fetchall()) == 0:								
-				cmd = f"INSERT INTO genre VALUES ('{request.form['genre2'].lower()}')"
+				cmd = f"INSERT INTO genre (genre_name, book_count) VALUES ('{request.form['genre2'].lower()}', 0)"
 				print(cmd)
 				cur.execute(cmd)
 
@@ -511,7 +511,7 @@ def add_book2(transaction_type):
 			cur.execute(cmd)
 			
 			if len(cur.fetchall()) == 0:								
-				cmd = f"INSERT INTO genre VALUES ('{request.form['genre3'].lower()}')"
+				cmd = f"INSERT INTO genre (genre_name, book_count) VALUES ('{request.form['genre3'].lower()}', 0)"
 				print(cmd)
 				cur.execute(cmd)
 
