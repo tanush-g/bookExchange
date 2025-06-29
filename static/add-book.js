@@ -1,7 +1,4 @@
-console.log("Hello World")
-
 ///////////////////////
-
 let lendRadio = document.getElementById("lend")
 let sellRadio = document.getElementById("sell")
 let exchangeRadio = document.getElementById("exchange")

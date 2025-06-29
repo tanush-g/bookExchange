@@ -2,24 +2,101 @@ from flask import Flask, render_template, redirect, url_for, request, session
 from flask_mysqldb import MySQL
 import MySQLdb
 from difflib import SequenceMatcher
-import config
+import secrets
+import hashlib
+import re
+import os
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
 
 import io
 from flask import Response
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from figure import create_figure
 
+# Load environment variables
+load_dotenv()
+
 app = Flask(__name__)
 
-app.secret_key = '9afd69d3d6ff1bdd87f0deb0'
+# Generate a secure secret key if not in environment
+app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+
+# Security configurations
+# Only require HTTPS in production
+app.config['SESSION_COOKIE_SECURE'] = os.environ.get('FLASK_ENV') == 'production'
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent XSS
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=2)  # Session timeout
 
 user_types = {1: 'school student', 2: 'college student', 3: "professor"}
 
-app.config['MYSQL_HOST'] = config.MYSQL_HOST
-app.config['MYSQL_USER'] = config.MYSQL_USER
-app.config['MYSQL_PASSWORD'] = config.MYSQL_PASSWORD
-app.config['MYSQL_DB'] = config.MYSQL_DB
-app.config['MYSQL_CURSORCLASS'] = config.MYSQL_CURSORCLASS
+# Security utility functions
+def hash_password(password):
+    """Hash a password with salt using SHA-256"""
+    salt = secrets.token_hex(16)
+    pwd_hash = hashlib.sha256((password + salt).encode()).hexdigest()
+    return f"{salt}:{pwd_hash}"
+
+def verify_password(password, stored_hash):
+    """Verify a password against stored hash"""
+    try:
+        # Check if it's a hashed password (contains ':')
+        if ':' in stored_hash:
+            salt, pwd_hash = stored_hash.split(':')
+            return hashlib.sha256((password + salt).encode()).hexdigest() == pwd_hash
+        else:
+            # Backward compatibility: compare with plain text password
+            print("Warning: Plain text password detected. Please update user passwords.")
+            return password == stored_hash
+    except ValueError:
+        return False
+
+def validate_email(email):
+    """Validate email format"""
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def validate_password(password):
+    """Validate password strength"""
+    if len(password) < 8:
+        return False, "Password must be at least 8 characters long"
+    if not re.search(r'[A-Z]', password):
+        return False, "Password must contain at least one uppercase letter"
+    if not re.search(r'[a-z]', password):
+        return False, "Password must contain at least one lowercase letter"
+    if not re.search(r'\d', password):
+        return False, "Password must contain at least one number"
+    return True, "Password is valid"
+
+def sanitize_input(text, max_length=255):
+    """Sanitize text input"""
+    if not text:
+        return ""
+    # Remove any potentially harmful characters
+    sanitized = re.sub(r'[<>"\']', '', str(text))
+    return sanitized[:max_length].strip()
+
+@app.before_request
+def security_headers():
+    """Add security headers to all responses"""
+    pass
+
+@app.after_request
+def add_security_headers(response):
+    """Add security headers"""
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    return response
+
+app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
+app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
+app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '')
+app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'bookexchange')
+app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
 mysql = MySQL(app)
 
@@ -34,44 +111,90 @@ def login(msg = 'hola'):
 
 @app.route('/checkuser', methods = ['POST'])
 def check_user():
-	email = str(request.form['email'])
-	password = str(request.form['psw'])
+	email = sanitize_input(request.form.get('email', ''))
+	password = request.form.get('psw', '')
+	
+	print(f"Login attempt for email: {email}")
+	
+	# Validate input
+	if not email or not password:
+		print("Missing email or password")
+		return redirect(url_for('login', msg='Email and password are required'))
+	
+	if not validate_email(email):
+		print(f"Invalid email format: {email}")
+		return redirect(url_for('login', msg='Invalid email format'))
+	
 	cur = mysql.connection.cursor()
 	
-	# Use parameterized query to prevent SQL injection
-	cur.execute("SELECT * FROM user WHERE email_id = %s", (email,))
-	user = cur.fetchone()
-	if user:
-		if (user['password'] == password):
-			session['loggedin'] = True
-			session['id'] = user['user_id']
-			session['name'] = user['name']
-			session['email'] = user['email_id']
-			session['user_type'] = user['user_type']
-			# Redirect to home page
-			return redirect(url_for('home', name = user['name'], user_id = user['user_id']))
+	try:
+		# Use parameterized query to prevent SQL injection
+		cur.execute("SELECT * FROM user WHERE email_id = %s", (email,))
+		user = cur.fetchone()
+		
+		if user:
+			print(f"User found: {user['name']}")
+			print(f"Stored password (first 10 chars): {user['password'][:10]}...")
+			
+			if verify_password(password, user['password']):
+				print("Password verification successful")
+				session.permanent = True
+				session['loggedin'] = True
+				session['id'] = user['user_id']
+				session['name'] = sanitize_input(user['name'])
+				session['email'] = user['email_id']
+				session['user_type'] = user['user_type']
+				return redirect(url_for('home', name=user['name'], user_id=user['user_id']))
+			else:
+				print("Password verification failed")
+				return redirect(url_for('login', msg='Invalid email or password'))
 		else:
-			return redirect(url_for('login', msg = 'Wrong email or password'))
-
-		# print(id)
-	else:
-		return redirect(url_for('login', msg = 'Login failed'))
-
-	# if len(user) == 1:
-		# return redirect(url_for('home', name = user['name'], user_id = id))
+			print("No user found with that email")
+			return redirect(url_for('login', msg='Invalid email or password'))
+	
+	except Exception as e:
+		print(f"Login error: {e}")
+		return redirect(url_for('login', msg='Login failed'))
+	
+	finally:
+		cur.close()
 
 @app.route('/createaccount')
-def create_account():
-	return render_template('create_account.html')
+@app.route('/createaccount/<msg>')
+def create_account(msg=None):
+	return render_template('create_account.html', msg=msg)
 
 @app.route('/signup', methods = ['POST'])
 def sign_up():
-	name = str(request.form['name'])
-	email = str(request.form['email'])
-	phone = str(request.form['phone'])
-	password = str(request.form['psw'])
-	location = str(request.form['location'])
-	user_type = request.form['user_type']
+	# Sanitize and validate inputs
+	name = sanitize_input(request.form.get('name', ''))
+	email = sanitize_input(request.form.get('email', ''))
+	phone = sanitize_input(request.form.get('phone', ''))
+	password = request.form.get('psw', '')
+	location = sanitize_input(request.form.get('location', ''))
+	user_type = request.form.get('user_type', '')
+	
+	# Validate required fields
+	if not all([name, email, phone, password, location, user_type]):
+		return redirect(url_for('create_account', msg='All fields are required'))
+	
+	# Validate email format
+	if not validate_email(email):
+		return redirect(url_for('create_account', msg='Invalid email format'))
+	
+	# Validate password strength
+	is_valid, msg = validate_password(password)
+	if not is_valid:
+		return redirect(url_for('create_account', msg=msg))
+	
+	# Validate user type
+	if user_type not in ['1', '2', '3', '4', '5']:
+		return redirect(url_for('create_account', msg='Invalid user type'))
+	
+	# Hash password
+	hashed_password = hash_password(password)
+	print(f"Original password length: {len(password)}")
+	print(f"Hashed password (first 20 chars): {hashed_password[:20]}...")
 
 	cur = mysql.connection.cursor()
 	try:
@@ -79,29 +202,29 @@ def sign_up():
 		cmd = '''INSERT INTO user (name, email_id, contact_num, location, password, user_type) 
 				VALUES (%s, %s, %s, %s, %s, %s)'''
 		
-		cur.execute(cmd, (name, email, phone, location, password, user_type))
+		cur.execute(cmd, (name, email, phone, location, hashed_password, user_type))
 		mysql.connection.commit()
 		
-		print(f"User inserted successfully with ID: {cur.lastrowid}")
+		print(f"User created successfully with ID: {cur.lastrowid}")
+		return redirect(url_for('login', msg='Account created successfully! Please log in.'))
 		
 	except MySQLdb.IntegrityError as e:
 		print(f"Database integrity error: {e}")
 		mysql.connection.rollback()
-		# Handle duplicate email or other constraint violations
+		return redirect(url_for('create_account', msg='Email already exists or invalid data'))
 		
 	except MySQLdb.Error as e:
 		print(f"Database error: {e}")
 		mysql.connection.rollback()
-		# Handle other database errors
+		return redirect(url_for('create_account', msg='Registration failed. Please try again.'))
 		
 	except Exception as e:
 		print(f"Unexpected error: {e}")
 		mysql.connection.rollback()
+		return redirect(url_for('create_account', msg='Registration failed. Please try again.'))
 		
 	finally:
 		cur.close()
-  
-	return redirect(url_for('login', msg = 'now you can login'))
 
 @app.route('/home/<name>/<user_id>')
 def home(name, user_id):
@@ -727,4 +850,9 @@ def logout():
 	return redirect(url_for('login'))
 
 if __name__ == '__main__':
-	app.run(debug = True, port = 5001)
+	# Production configuration
+	if os.environ.get('FLASK_ENV') == 'production':
+		app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
+	else:
+		# Development configuration
+		app.run(debug=True, port=5001)

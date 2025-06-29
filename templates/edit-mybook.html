@@ -3,47 +3,119 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<h1>Edit {{ mybook['name'] }} by {{ mybook['author'] }}</h1>
+	<title>Edit Book - BookExchange</title>
+	<h1>Edit "{{ mybook['name'] }}" by {{ mybook['author'] }}</h1>
+	<h3>Go back to <a href="{{ url_for('my_books') }}">My Books</a> or <a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>.</h3>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+	<style>
+		a:link, a:visited {
+		  background-color: #f44336;
+		  color: white;
+		  padding: 10px 20px;
+		  border-radius: 12px;
+		  text-align: center;
+		  text-decoration: none;
+		  display: inline-block;
+		  border: 2px solid black;
+		}
+
+		a:hover, a:active {
+		  background-color: red;
+		}
+
+		.button {
+		  background-color: red;
+		  border: 2px solid black;
+		  border-radius: 12px;
+		  color: white;
+		  padding: 3px 12px;
+		  text-align: center;
+		  text-decoration-color: yellow;
+		  font-size: 10px;
+		  margin: 3px 1px;
+		  opacity: 0.6;
+		  transition: 0.3s;
+		  display: inline-block;
+		  text-decoration: none;
+		  cursor: pointer;
+		}
+
+		.button:hover {opacity: 1}
+
+		.transaction-info {
+		  background-color: #f0f0f0;
+		  padding: 10px;
+		  border-radius: 8px;
+		  margin: 10px 0;
+		  border: 1px solid #ccc;
+		}
+
+		.readonly-info {
+		  color: #666;
+		  font-style: italic;
+		  margin-bottom: 10px;
+		}
+	</style>
 </head>
 <body>
-	<form action="{{ url_for('edit_book', book_id = mybook['book_id']) }}" method="POST">
-		<!-- <label for="name"><b>Book Name</b></label>
-		<input type="text" placeholder="Edit book name" name="name" value="{{ mybook['name'] }}" required>
-		<br>
-		<br> -->
-		<!-- <label for="author"><b>Author</b></label>
-		<input type="text" placeholder="Edit author name" name="author" value="{{ mybook['author'] }}" required>
-		<br> 
-		<br> -->
-		<input style="display: none;" type="text" name="transaction_type" value="{{ mybook['transaction_type'] }}">
-		<label for="description"><b>Description</b></label>
-		<input type="text" placeholder="Edit the description" name="description" value="{{ mybook['description'] }}" required>
-		<br> 
-		<br>
-		<label for="pagecount"><b>No. of pages</b></label>
-		<input type="number" placeholder="Edit no. of pages" name="page_count" value="{{ mybook['page_count'] }}" required>
-		<br>
-		<br>
-		{% if mybook['transaction_type'] == 1 %}
-			<label for="exchange-description"><b>Edit exchange description</b></label> 
-			<input type="text" placeholder="Enter description" name="exchange-description" value="{{ mybook['exchange_with'] }}" required> <br>
-		{% endif %}
+	<form action="{{ url_for('edit_book', book_id=mybook['book_id']) }}" method="POST">
+		<div class="container">
+			<!-- Display readonly book information -->
+			<div class="readonly-info">
+				<p><strong>Book:</strong> {{ mybook['name'] }}</p>
+				<p><strong>Author:</strong> {{ mybook['author'] }}</p>
+				<p><strong>Transaction Type:</strong> 
+					{% if mybook['transaction_type'] == 1 %}Borrow/Lend
+					{% elif mybook['transaction_type'] == 2 %}Buy/Sell
+					{% elif mybook['transaction_type'] == 3 %}Exchange
+					{% endif %}
+				</p>
+			</div>
 
-		{% if mybook['transaction_type'] == 2 %}
-			<label for="num-of-days"><b>Edit price</b></label>
-			<input type="number" placeholder="Edit price" name="price" required value="{{ mybook['price'] }}">
-			<br><br>
-			<label for="price"><b>Edit no. of days</b></label> 
-			<input type="number" placeholder="Enter no. of days" name="num_of_days" value="{{ mybook['num_of_days'] }}" required> <br>
-		{% endif %}
+			<input type="hidden" name="transaction_type" value="{{ mybook['transaction_type'] }}">
+			
+			<label for="description"><b>Description</b></label>
+			<input class="textfield" type="text" placeholder="Edit the description" name="description" value="{{ mybook['description'] }}" required maxlength="500">
+			<br>
+			<br>
+			
+			<label for="page_count"><b>Number of pages</b></label>
+			<input type="number" placeholder="Edit number of pages" name="page_count" value="{{ mybook['page_count'] }}" required min="1" max="10000">
+			<br>
+			<br>
 
-		{% if mybook['transaction_type'] == 3 %}
-			<label for="num-of-days"><b>Edit price</b></label>
-			<input type="number" placeholder="Edit price" name="price" required value="{{ mybook['price'] }}"> <br>
-		{% endif %}
-		<br>
-		<button type="submit">Save</button>
+			<!-- Transaction-specific fields -->
+			{% if mybook['transaction_type'] == 1 %}
+			<div class="transaction-info">
+				<h4>Borrowing/Lending Details</h4>
+				<label for="price"><b>Daily rental price ($)</b></label>
+				<input type="number" step="0.01" placeholder="Price per day" name="price" required value="{{ mybook['price'] }}" min="0" max="999.99">
+				<br><br>
+				<label for="num_of_days"><b>Maximum lending period (days)</b></label>
+				<input type="number" placeholder="Maximum days to lend" name="num_of_days" value="{{ mybook['num_of_days'] }}" required min="1" max="365">
+			</div>
+			{% endif %}
+
+			{% if mybook['transaction_type'] == 2 %}
+			<div class="transaction-info">
+				<h4>Selling Details</h4>
+				<label for="price"><b>Selling price ($)</b></label>
+				<input type="number" step="0.01" placeholder="Selling price" name="price" required value="{{ mybook['price'] }}" min="0" max="9999.99">
+			</div>
+			{% endif %}
+
+			{% if mybook['transaction_type'] == 3 %}
+			<div class="transaction-info">
+				<h4>Exchange Details</h4>
+				<label for="exchange-description"><b>What would you like to exchange this book for?</b></label>
+				<input class="textfield" type="text" placeholder="Describe what you want in exchange" name="exchange-description" value="{{ mybook['exchange_with'] }}" required maxlength="200">
+			</div>
+			{% endif %}
+
+			<br>
+			<button type="submit" class="button">Save Changes</button>
+			<a href="{{ url_for('my_books') }}" class="button" style="background-color: #666; margin-left: 10px;">Cancel</a>
+		</div>
 	</form>
 </body>
 </html>
