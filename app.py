@@ -134,7 +134,7 @@ def check_user():
 		
 		if user:
 			print(f"User found: {user['name']}")
-			print(f"Stored password (first 10 chars): {user['password'][:10]}...")
+			# Do not log any portion of the stored password hash for security reasons
 			
 			if verify_password(password, user['password']):
 				print("Password verification successful")
@@ -159,7 +159,7 @@ def check_user():
 	finally:
 		cur.close()
 
-@app.route('/createaccount')
+@app.route('/createaccount', defaults={'msg': None})
 @app.route('/createaccount/<msg>')
 def create_account(msg=None):
 	return render_template('create_account.html', msg=msg)

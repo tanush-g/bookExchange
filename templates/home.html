@@ -4,9 +4,6 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>BookExchange</title>
-	<h1>BookExchange</h1>
-	<h2>Welcome, {{ name }}!</h2>
-
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
 	<style>
 		a:link, a:visited {
@@ -23,29 +20,37 @@
 		a:hover, a:active {
 		  background-color: red;
 		}
-	.container{
-		 
-	}
-	.button {
-	  background-color: red;
-	  border: 2px solid black;
-	  border-radius: 12px;
-	  color: white;
-	  padding: 3px 12px;
-	  text-align: center;
-	  text-decoration-color: yellow;
-	  font-size: 10px;
-	  margin: 3px 1px;
-	  opacity: 0.6;
-	  transition: 0.3s;
-	  display: inline-block;
-	  text-decoration: none;
-	  cursor: pointer;
-	}
-	.button:hover {opacity: 1}
+		
+		.container {
+		  background-color: beige;
+		  float: right;
+		}
+		
+		.button {
+		  background-color: red;
+		  border: 2px solid black;
+		  border-radius: 12px;
+		  color: white;
+		  padding: 3px 12px;
+		  text-align: center;
+		  text-decoration-color: yellow;
+		  font-size: 10px;
+		  margin: 3px 1px;
+		  opacity: 0.6;
+		  transition: 0.3s;
+		  display: inline-block;
+		  text-decoration: none;
+		  cursor: pointer;
+		}
+		
+		.button:hover {
+		  opacity: 1;
+		}
 	</style>
 </head>
 <body>
+	<h1>BookExchange</h1>
+	<h2>Welcome, {{ name }}!</h2>
 
 	<div class="container">
 		<div class="searchbox">

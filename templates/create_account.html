@@ -4,7 +4,6 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Create Account - BookExchange</title>
-	<h1>Create Account</h1>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
 	<style>
 		.error-msg { color: red; font-weight: bold; margin: 10px 0; }
@@ -12,6 +11,7 @@
 	</style>
 </head>
 <body>
+	<h1>Create Account</h1>
 	{% if msg %}
 		<p class="error-msg">{{ msg }}</p>
 	{% endif %}
