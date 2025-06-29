@@ -696,7 +696,11 @@ def success_page(msg):
 
 @app.route('/analytics')
 def analytics():
-	pass
+	if 'loggedin' not in session:
+		return redirect(url_for('login'))
+	
+	# For now, just render a simple page that shows the plot
+	return render_template('analytics.html')
 
 @app.route('/plot.png')
 def plot_png():
@@ -705,14 +709,20 @@ def plot_png():
 
 	try:
 		cur = mysql.connection.cursor()
+		# Use all_books instead of archive for better data availability
 		cmd = '''SELECT temp.genre_name, temp.transaction_type, COUNT(*) as Total_Books 
 				FROM (SELECT genre_name, transaction_type 
-					FROM archive s, book_genre_relation t 
+					FROM all_books s, book_genre_relation t 
 					WHERE s.unique_id = t.unique_id) as temp 
 				GROUP BY temp.genre_name, temp.transaction_type WITH ROLLUP;'''
 		cur.execute(cmd)
 		res = cur.fetchall()
-		print(res)
+		print(f"Analytics data: {res}")
+		
+		# Check if we have enough data
+		if not res or len(res) < 3:
+			print("Insufficient data for analytics")
+			return redirect(url_for('success_page', msg="Not enough data for analytics. Add more books with genres."))
 
 		fig = create_figure(res)
 		output = io.BytesIO()
@@ -720,8 +730,10 @@ def plot_png():
 		return Response(output.getvalue(), mimetype='image/png')
 
 	except Exception as e:
-		print(f"Database error: {e}")  # Better error logging
-		return redirect(url_for('success_page', msg="Not enough data."))
+		print(f"Analytics error: {e}")
+		import traceback
+		traceback.print_exc()
+		return redirect(url_for('success_page', msg="Analytics error. Please try again later."))
 
 @app.route('/logout')
 def logout():
