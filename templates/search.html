@@ -3,31 +3,46 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<h1>Search Results</h1>
-	<h3>Go back to <a href="{{ url_for('home', name = session['name'], user_id = session['id']) }}">Home</a>.</h3>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
-	<style>
-		a:link, a:visited {
-		  background-color: #f9e4b7;
-		  color: white;
-		  padding: 10px 20px;
-		  border-radius: 12px;
-		  text-align: center;
-		  text-decoration: none;
-		  display: inline-block;
-		  border: 2px solid black;
-		  color: black;
-		}
-
-		a:hover, a:active {
-		  background-color: #cfb997;
-		}
-	</style>
+	<title>Search Results - BookExchange</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-	{% for result in search_results %}
-		<p><a href="{{ url_for('ubook_page', unique_id = result['unique_id']) }}">{{ result['name']}} by {{ result['author'] }}</a></p>
-	{% endfor %}
+	<div class="main-content">
+		<h1>🔍 Search Results</h1>
+		
+		<div class="breadcrumb">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>
+			<span>›</span>
+			<span>Search Results</span>
+		</div>
+		
+		<div class="container">
+			{% if search_results %}
+				<h3>Found {{ search_results|length }} book(s)</h3>
+				{% for result in search_results %}
+					<div class="book-card">
+						<h4><a href="{{ url_for('ubook_page', unique_id=result['unique_id']) }}">{{ result['name'] }}</a></h4>
+						<p><strong>Author:</strong> {{ result['author'] }}</p>
+						{% if result['rating'] > 0 %}
+							<p><strong>Rating:</strong> {{ "%.1f"|format(result['rating']) }}/10 ({{ result['review_count'] }} reviews)</p>
+						{% endif %}
+						{% if result['recommendation_count'] > 0 %}
+							<p><strong>Recommended by:</strong> {{ result['recommendation_count'] }} professor(s)</p>
+						{% endif %}
+					</div>
+				{% endfor %}
+			{% else %}
+				<div class="container text-center">
+					<h3>No books found</h3>
+					<p>Try adjusting your search criteria or browse our recommendations on the home page.</p>
+					<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}" class="btn btn-primary">Back to Home</a>
+				</div>
+			{% endif %}
+		</div>
+		
+		<div class="text-center mt-4">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}" class="btn btn-secondary">← Back to Home</a>
+		</div>
+	</div>
 </body>
 </html>

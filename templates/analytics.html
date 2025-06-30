@@ -3,47 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookExchange - Analytics</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
-    <style>
-        .analytics-container {
-            text-align: center;
-            padding: 20px;
-            max-width: 800px;
-            margin: 0 auto;
-        }
-        .chart-container {
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            padding: 10px;
-            border-radius: 8px;
-        }
-        .back-link {
-            background-color: #f44336;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 12px;
-            text-decoration: none;
-            display: inline-block;
-            margin: 20px;
-        }
-        .back-link:hover {
-            background-color: red;
-        }
-    </style>
+    <title>Analytics - BookExchange</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-    <div class="analytics-container">
+    <div class="main-content">
         <h1>📊 BookExchange Analytics</h1>
-        <h2>Book Distribution by Genre and Transaction Type</h2>
         
-        <div class="chart-container">
-            <img src="{{ url_for('plot_png') }}" alt="Analytics Chart" style="max-width: 100%; height: auto;">
+        <div class="breadcrumb">
+            <a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>
+            <span>›</span>
+            <span>Analytics</span>
         </div>
         
-        <p>This chart shows the distribution of books across different genres and transaction types (Borrowing, Buying, Exchanging).</p>
-        
-        <a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}" class="back-link">← Back to Home</a>
+        <div class="analytics-container">
+            <h2>Book Distribution by Genre and Transaction Type</h2>
+            
+            <div class="chart-container">
+                <img src="{{ url_for('plot_png') }}" alt="Analytics Chart" style="max-width: 100%; height: auto;">
+            </div>
+            
+            <p>This chart shows the distribution of books across different genres and transaction types (Borrowing, Buying, Exchanging).</p>
+            
+            <div class="text-center mt-4">
+                <a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}" class="btn btn-secondary">← Back to Home</a>
+            </div>
+        </div>
     </div>
 </body>
 </html>

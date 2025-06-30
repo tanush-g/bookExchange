@@ -6,7 +6,7 @@ import secrets
 import hashlib
 import re
 import os
-from datetime import datetime, timedelta
+from datetime import timedelta
 from dotenv import load_dotenv
 
 import io
@@ -265,7 +265,7 @@ def home(name, user_id):
 	cur.execute(cmd, (session['user_type'],))
 	user_type_recommendations = cur.fetchall()
 
-	return render_template('home.html', name = name, user_id = user_id, available_genres = available_genres, trending_genres = trending_genres, recommendations = recommendations, user_type_recommendations = user_type_recommendations)
+	return render_template('home.html', name = name, user_id = user_id, available_genres = available_genres, trending_genres = trending_genres, recommendations = recommendations, user_type_recommendations = user_type_recommendations, user_types = user_types)
 
 @app.route('/search', methods = ['GET'])
 def search():

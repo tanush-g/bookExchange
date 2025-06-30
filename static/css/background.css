@@ -1,9 +1,0 @@
-body {
-	background-image: url("../background1.jpeg");
-}
-
-body > * {
-	background-color: beige;
-	width: fit-content;
-	padding: 5px;
-}

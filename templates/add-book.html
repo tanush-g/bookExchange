@@ -3,52 +3,61 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<h1>Add a book</h1>
-	<h3>Go back to <a href="{{ url_for('home', name = session['name'], user_id = session['id']) }}">Home</a>.</h3>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+	<title>Add Book - BookExchange</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-	<form action="/addbook" method="POST">
-		<div class="container">
-			<label for="name"><b>Book Name</b></label>
-			<input class="textfield" type="text" placeholder="Enter book name" name="name" required>
-			<br>
-			<br>
-			<label for="author"><b>Author</b></label>
-			<input class="textfield" type="text" placeholder="Enter author name" name="author" required>
-			<br> 
-			<br>
-			<label for="description"><b>Description</b></label>
-			<input class="textfield" type="text" placeholder="Enter a description" name="description" required>
-			<br>
-			<br>
-			<label for="pagecount"><b>No. of pages</b></label>
-			<input type="number" placeholder="Enter no. of pages" name="pagecount" required>
-			<br> 
-			<br>
-			<label><b>What do you want to do with the book?</b></label>
-			<br>
-			<br>
-			<input type="radio" name="transaction_type" value="1" id="lend">
-			<label for="1">Lend</label>
-			<br>
-			<input type="radio" name="transaction_type" value="2" id="sell">
-			<label for="2">Sell</label>
-			<br>
-			<input type="radio" name="transaction_type" value="3" id="exchange">
-			<label for="3">Exchange</label><br>
-			<br>
-			<br>
+	<div class="main-content">
+		<h1>📚 Add a New Book</h1>
+		
+		<div class="breadcrumb">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>
+			<span>›</span>
+			<span>Add Book</span>
+		</div>
+		
+		<div class="form-container">
+			<form action="{{ url_for('add_book') }}" method="POST">
+				<div class="form-group">
+					<label for="name"><b>Book Name</b></label>
+					<input type="text" placeholder="Enter book name" name="name" required maxlength="255">
+				</div>
+				
+				<div class="form-group">
+					<label for="author"><b>Author</b></label>
+					<input type="text" placeholder="Enter author name" name="author" required maxlength="255">
+				</div>
+				
+				<div class="form-group">
+					<label for="description"><b>Description</b></label>
+					<textarea placeholder="Enter a description" name="description" required maxlength="500" rows="4"></textarea>
+				</div>
+				
+				<div class="form-group">
+					<label for="pagecount"><b>Number of pages</b></label>
+					<input type="number" placeholder="Enter number of pages" name="pagecount" required min="1" max="10000">
+				</div>
+				
+				<div class="form-group">
+					<label><b>What do you want to do with the book?</b></label>
+					<div class="radio-group">
+						<label><input type="radio" name="transaction_type" value="1" id="lend" required> 🤝 Lend (for borrowing)</label>
+						<label><input type="radio" name="transaction_type" value="2" id="sell" required> 💰 Sell (for buying)</label>
+						<label><input type="radio" name="transaction_type" value="3" id="exchange" required> 🔄 Exchange (for swapping)</label>
+					</div>
+				</div>
 
-			<div class="exchange-description"></div>
-			<div class="price"></div>
-			<div class="num-of-days"></div>
-			
-			<br>
-			<button type="submit">Proceed</button>
-		  </div>
-	</form>
-	<script src="../static/add-book.js"></script>
+				<div class="exchange-description"></div>
+				<div class="price"></div>
+				<div class="num-of-days"></div>
+				
+				<div class="form-group text-center">
+					<button type="submit" class="btn btn-primary">Continue</button>
+					<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}" class="btn btn-secondary">Cancel</a>
+				</div>
+			</form>
+		</div>
+	</div>
+	<script src="{{ url_for('static', filename='add-book.js') }}"></script>
 </body>
 </html>

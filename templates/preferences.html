@@ -3,45 +3,57 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<h1>Preferences</h1>
-	<h3>Go back to <a href="{{ url_for('home', name = session['name'], user_id = session['id']) }}">Home</a>.</h3>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
-	<style>
-		a:link, a:visited {
-		  background-color: #f9e4b7;
-		  color: white;
-		  padding: 10px 20px;
-		  border-radius: 12px;
-		  text-align: center;
-		  text-decoration: none;
-		  display: inline-block;
-		  border: 2px solid black;
-		  color: black;
-		}
-
-		a:hover, a:active {
-		  background-color: #cfb997;
-		}
-	</style>
+	<title>Preferences - BookExchange</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-	<div style="margin-bottom: 5pc;">
-		<h3>Available Genres</h3>
-		<p>click on a genre to add it to your preferences</p>
-		{% for genre in available_genres %}
-			<a href="{{ url_for('preferences', todo = 'add', genre = genre['genre_name']) }}">{{ genre['genre_name'] }}</a>
-		{% endfor %}
-	</div>
+	<div class="main-content">
+		<h1>⚙️ Manage Preferences</h1>
+		
+		<div class="breadcrumb">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>
+			<span>›</span>
+			<span>Preferences</span>
+		</div>
+		
+		<div class="container">
+			<div class="mb-4">
+				<h3>📚 Available Genres</h3>
+				<p>Click on a genre to add it to your preferences:</p>
+				<div class="promotion">
+					{% if available_genres %}
+						{% for genre in available_genres %}
+							<a href="{{ url_for('preferences', todo='add', genre=genre['genre_name']) }}">
+								{{ genre['genre_name'] }}
+							</a>
+						{% endfor %}
+					{% else %}
+						<p><em>All genres are already in your preferences!</em></p>
+					{% endif %}
+				</div>
+			</div>
 
-	<div>
-		<h3>Preferred Genres</h3>
-		<p>click on a genre to remove it from your preferences</p>
-		{% for genre in preferred_genres %}
-			<a href="{{ url_for('preferences', todo = 'remove', genre = genre['genre_name']) }}">{{ genre['genre_name'] }}</a>
-		{% endfor %}
+			<div>
+				<h3>❤️ Your Preferred Genres</h3>
+				<p>Click on a genre to remove it from your preferences:</p>
+				<div class="promotion">
+					{% if preferred_genres %}
+						{% for genre in preferred_genres %}
+							<a href="{{ url_for('preferences', todo='remove', genre=genre['genre_name']) }}" 
+							   style="background-color: #f44336; color: white;">
+								{{ genre['genre_name'] }} ✕
+							</a>
+						{% endfor %}
+					{% else %}
+						<p><em>You haven't selected any preferred genres yet.</em></p>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+		
+		<div class="text-center mt-4">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}" class="btn btn-secondary">← Back to Home</a>
+		</div>
 	</div>
-
-	
 </body>
 </html>

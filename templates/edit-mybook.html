@@ -4,60 +4,19 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Edit Book - BookExchange</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
-	<style>
-		a:link, a:visited {
-		  background-color: #f44336;
-		  color: white;
-		  padding: 10px 20px;
-		  border-radius: 12px;
-		  text-align: center;
-		  text-decoration: none;
-		  display: inline-block;
-		  border: 2px solid black;
-		}
-
-		a:hover, a:active {
-		  background-color: red;
-		}
-
-		.button {
-		  background-color: red;
-		  border: 2px solid black;
-		  border-radius: 12px;
-		  color: white;
-		  padding: 3px 12px;
-		  text-align: center;
-		  text-decoration-color: yellow;
-		  font-size: 10px;
-		  margin: 3px 1px;
-		  opacity: 0.6;
-		  transition: 0.3s;
-		  display: inline-block;
-		  text-decoration: none;
-		  cursor: pointer;
-		}
-
-		.button:hover {opacity: 1}
-
-		.transaction-info {
-		  background-color: #f0f0f0;
-		  padding: 10px;
-		  border-radius: 8px;
-		  margin: 10px 0;
-		  border: 1px solid #ccc;
-		}
-
-		.readonly-info {
-		  color: #666;
-		  font-style: italic;
-		  margin-bottom: 10px;
-		}
-	</style>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-	<h1>Edit "{{ mybook['name'] }}" by {{ mybook['author'] }}</h1>
-	<h3>Go back to <a href="{{ url_for('my_books') }}">My Books</a> or <a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>.</h3>
+	<div class="main-content">
+		<h1>✏️ Edit "{{ mybook['name'] }}"</h1>
+		
+		<div class="breadcrumb">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>
+			<span>›</span>
+			<a href="{{ url_for('my_books') }}">My Books</a>
+			<span>›</span>
+			<span>Edit Book</span>
+		</div>
 	<form action="{{ url_for('edit_book', book_id=mybook['book_id']) }}" method="POST">
 		<div class="container">
 			<!-- Display readonly book information -->

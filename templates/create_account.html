@@ -4,63 +4,70 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Create Account - BookExchange</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
-	<style>
-		.error-msg { color: red; font-weight: bold; margin: 10px 0; }
-		.password-help { font-size: 0.9em; color: #666; margin: 5px 0; }
-	</style>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-	<h1>Create Account</h1>
-	{% if msg %}
-		<p class="error-msg">{{ msg }}</p>
-	{% endif %}
-	
-	<form action="/signup" method="POST">
-		<div class="container">
-			<label for="name"><b>Name</b></label>
-			<input type="text" placeholder="Enter Name" name="name" required maxlength="100">
-			<br>
-			<br>
-			<label for="email"><b>Email</b></label>
-			<input type="email" placeholder="Enter Email ID" name="email" required maxlength="255">
-			<br>
-			<br>
-			<label for="phone"><b>Phone</b></label>
-			<input type="tel" placeholder="Enter Phone No." name="phone" required maxlength="20">
-			<br>
-			<br>
-			<label for="psw"><b>Password</b></label>
-			<input type="password" placeholder="Enter Password" name="psw" required minlength="8">
-			<p class="password-help">Password must be at least 8 characters with uppercase, lowercase, and numbers</p>
-			<br> 
-			<label for="location"><b>Enter Location</b></label>
-			<input type="text" placeholder="Enter Location" name="location" required maxlength="100">
-			<br>
-			<br>
-			<label for=""><b>Who are you?</b></label>
-			<br><br>
-			<input type="radio" name="user_type" value="1">
-			<label for="1">School student</label>
-			<br>
-			<input type="radio" name="user_type" value="2">
-			<label for="1">College student</label>
-			<br>
-			<input type="radio" name="user_type" value="3">
-			<label for="2">Teacher/Professor</label>
-			<br>
-			<input type="radio" name="user_type" value="4">
-			<label for="3">Seller</label>
-			<br>
-			<input type="radio" name="user_type" value="5">
-			<label for="3">Just a reader :)</label>
-			<br>
-			<br>
-			<button type="submit">Sign Up</button>
-		  </div>
-	</form>
-
-	<br>
-	<a href="./">Existing user? Login here.</a>
+	<div class="main-content">
+		<h1>📝 Create New Account</h1>
+		
+		<div class="breadcrumb">
+			<a href="{{ url_for('login') }}">Login</a>
+			<span>›</span>
+			<span>Create Account</span>
+		</div>
+		
+		{% if msg %}
+			<div class="error-msg">{{ msg }}</div>
+		{% endif %}
+		
+		<div class="form-container">
+			<form action="{{ url_for('sign_up') }}" method="POST">
+				<div class="form-group">
+					<label for="name"><b>Full Name</b></label>
+					<input type="text" placeholder="Enter your full name" name="name" required maxlength="100">
+				</div>
+				
+				<div class="form-group">
+					<label for="email"><b>Email Address</b></label>
+					<input type="email" placeholder="Enter your email address" name="email" required maxlength="255">
+				</div>
+				
+				<div class="form-group">
+					<label for="phone"><b>Phone Number</b></label>
+					<input type="tel" placeholder="Enter your phone number" name="phone" required maxlength="20">
+				</div>
+				
+				<div class="form-group">
+					<label for="psw"><b>Password</b></label>
+					<input type="password" placeholder="Enter a secure password" name="psw" required minlength="8">
+					<div class="password-help">Password must be at least 8 characters with uppercase, lowercase, and numbers</div>
+				</div>
+				
+				<div class="form-group">
+					<label for="location"><b>Location</b></label>
+					<input type="text" placeholder="Enter your location" name="location" required maxlength="100">
+				</div>
+				
+				<div class="form-group">
+					<label><b>Who are you?</b></label>
+					<div class="radio-group">
+						<label><input type="radio" name="user_type" value="1" required> School student</label>
+						<label><input type="radio" name="user_type" value="2" required> College student</label>
+						<label><input type="radio" name="user_type" value="3" required> Teacher/Professor</label>
+						<label><input type="radio" name="user_type" value="4" required> Seller</label>
+						<label><input type="radio" name="user_type" value="5" required> Just a reader :)</label>
+					</div>
+				</div>
+				
+				<div class="form-group text-center">
+					<button type="submit" class="btn btn-primary">Create Account</button>
+				</div>
+			</form>
+			
+			<div class="text-center mt-3">
+				<p>Already have an account? <a href="{{ url_for('login') }}" class="btn btn-secondary">Login Here</a></p>
+			</div>
+		</div>
+	</div>
 </body>
 </html>

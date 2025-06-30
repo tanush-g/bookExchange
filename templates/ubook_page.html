@@ -3,106 +3,139 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
-	<h3>Go back to <a href="{{ url_for('home', name = session['name'], user_id = session['id']) }}">Home</a>.</h3>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/ubook_page.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/background.css') }}">
+	<title>{{ unique_book['name'] }} - BookExchange</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-	<h1>{{ unique_book['name'] }}</h1>
-	<h2>By {{ unique_book['author'] }}</h2>
-
-	{% if session['user_type'] == 3 %}
-		<a href="{{ url_for('recommend', unique_id = unique_book['unique_id']) }}" id="recommend">Recommend this!</a>
-		<br>
-	{% endif %}
-
-	{% if unique_book['recommendation_count'] == 1 %}
-		<p><b>Recommended By:</b> {{ unique_book['recommendation_count'] }} professor</p>
-	{% else%}
-		<p><b>Recommended By:</b> {{ unique_book['recommendation_count'] }} professors</p>
-	{% endif %}
-	
-	{% if unique_book['review_count'] == 1 %}
-		<p><b>Average Rating:</b> {{ unique_book['rating'] }} ({{ unique_book['review_count'] }} user)</p>
-	{% else%}
-		<p><b>Average Rating:</b> {{ unique_book['rating'] }} ({{ unique_book['review_count'] }} users)</p>
-	{% endif %}
-
-	<b>Genres:</b>
-	{% for genre in unique_book['genres'] %}
-		{{ genre }} 
-	{% endfor %}
-
-	<br><br>
-
-	<div class="filter">
-		<b>Filter ads by:</b>
-		<a href="{{ url_for('ubook_page', unique_id = unique_book['unique_id'], ttype = 1) }}">exchange</a>
-		<a href="{{ url_for('ubook_page', unique_id = unique_book['unique_id'], ttype = 2) }}">borrowing</a>
-		<a href="{{ url_for('ubook_page', unique_id = unique_book['unique_id'], ttype = 3) }}">buying</a>
-		<a href="{{ url_for('ubook_page', unique_id = unique_book['unique_id'], ttype = None) }}">(remove filter)</a>
-	</div>
-
-	<button id="rate">Rate and Review</button>
-	<br><br>
-
-	<div class="reviews">
-		<h3>Reviews</h3>
-		{% for review in unique_book['reviews'] %}
-		<div class="review">
-			<p><b>Posted by:</b> {{  review['name' ]}} ({{ user_types[review['user_type']] }})</p>
-			<p><b>{{  review['title'] }}</b></p>
-			<p>{{  review['body'] }}</p>
+	<div class="main-content">
+		<div class="breadcrumb">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}">Home</a>
+			<span>›</span>
+			<span>{{ unique_book['name'] }}</span>
 		</div>
-		{% endfor %}
-	</div>
+		
+		<h1>📖 {{ unique_book['name'] }}</h1>
+		<h2>👤 By {{ unique_book['author'] }}</h2>
 
-	<form action="{{ url_for('review') }}" method="POST">
-		<label for="">Rating</label>
-		<input type="number" min="1" max="10" name="rating" required>
-		<br><br>
-		<label for="">Title</label>
-		<input type="text" name="title" required>
-		<br><br>
-		<label for="">Review</label>
-		<input type="text" name="body" required>
-		<br>
-		<br>
-		<input style="display: none;" type="number" name="unique_id" value="{{ unique_book['unique_id'] }}">
-		<button type="submit">Submit</button>
-	</form>
+		{% if session['user_type'] == 3 %}
+			<div class="mb-3">
+				<a href="{{ url_for('recommend', unique_id=unique_book['unique_id']) }}" id="recommend" class="btn btn-success">
+					⭐ Recommend this Book!
+				</a>
+			</div>
+		{% endif %}
 
-	<br><br>
+		<div class="container">
+			<div class="book-card">
+				{% if unique_book['recommendation_count'] == 1 %}
+					<p><strong>👨‍🏫 Recommended by:</strong> {{ unique_book['recommendation_count'] }} professor</p>
+				{% else %}
+					<p><strong>👨‍🏫 Recommended by:</strong> {{ unique_book['recommendation_count'] }} professors</p>
+				{% endif %}
+				
+				{% if unique_book['review_count'] == 1 %}
+					<p><strong>⭐ Average Rating:</strong> {{ "%.1f"|format(unique_book['rating']) }}/10 ({{ unique_book['review_count'] }} review)</p>
+				{% else %}
+					<p><strong>⭐ Average Rating:</strong> {{ "%.1f"|format(unique_book['rating']) }}/10 ({{ unique_book['review_count'] }} reviews)</p>
+				{% endif %}
 
-	<h3>Ads</h3>
-	{% for book in all_books %}
-		<div class="ads">
-			<p><b>Posted by:</b> {{  book['name' ]}}</p>
-			<p><b>Location:</b> {{  book['location' ]}}</p>
-			<p><b>Contact No.:</b> {{  book['contact_num' ]}}</p>
-			<p><b>Description:</b> {{  book['description' ]}}</p>
-			<p><b>Page count:</b> {{  book['page_count' ]}}</p>
-			
-			{% if book['transaction_type'] == 1 %}
-				<p><b>Available for:</b> Exchanging</p>
-				<p><b>Exchange description:</b> {{ book['exchange_with'] }}</p>
-			{% endif %}
+				<p><strong>📚 Genres:</strong>
+				{% for genre in unique_book['genres'] %}
+					<span style="background-color: #f0f0f0; padding: 2px 6px; border-radius: 4px; margin: 2px;">{{ genre }}</span>
+				{% endfor %}
+				</p>
+			</div>
 
-			{% if book['transaction_type'] == 2 %}
-				<p><b>Available for:</b> Borrowing</p>
-				<p><b>Price:</b> {{ book['price'] }}</p>
-				<p><b>No. of days it can be borrowed for:</b> {{ book['num_of_days'] }}</p>
-			{% endif %}
+			<div class="filter">
+				<strong>🔍 Filter listings by transaction type:</strong>
+				<a href="{{ url_for('ubook_page', unique_id=unique_book['unique_id'], ttype=1) }}">🤝 Borrowing</a>
+				<a href="{{ url_for('ubook_page', unique_id=unique_book['unique_id'], ttype=2) }}">💰 Buying</a>
+				<a href="{{ url_for('ubook_page', unique_id=unique_book['unique_id'], ttype=3) }}">🔄 Exchange</a>
+				<a href="{{ url_for('ubook_page', unique_id=unique_book['unique_id']) }}">📋 Show All</a>
+			</div>
 
-			{% if book['transaction_type'] == 3 %}
-				<p><b>Available for:</b> Buying</p>
-				<p><b>Price:</b> {{ book['price'] }}</p>
+			<div class="mb-3">
+				<button id="rate" class="btn btn-primary">⭐ Rate and Review</button>
+			</div>
+		</div>
+
+		<div class="reviews">
+			<h3>📝 Reviews</h3>
+			{% if unique_book['reviews'] %}
+				{% for review in unique_book['reviews'] %}
+					<div class="review">
+						<p><strong>👤 Posted by:</strong> {{ review['name'] }} ({{ user_types[review['user_type']] }})</p>
+						<p><strong>{{ review['title'] }}</strong></p>
+						<p>{{ review['body'] }}</p>
+					</div>
+				{% endfor %}
+			{% else %}
+				<div class="review">
+					<p><em>No reviews yet. Be the first to review this book!</em></p>
+				</div>
 			{% endif %}
 		</div>
-		<!-- {{ book }} -->
-	{% endfor %}
 
-	<script src="../static/ubook_page.js"></script>
+		<form action="{{ url_for('review') }}" method="POST" class="hidden">
+			<div class="form-container">
+				<h4>✍️ Write a Review</h4>
+				<div class="form-group">
+					<label for="rating">Rating (1-10)</label>
+					<input type="number" min="1" max="10" name="rating" required>
+				</div>
+				<div class="form-group">
+					<label for="title">Review Title</label>
+					<input type="text" name="title" required maxlength="255">
+				</div>
+				<div class="form-group">
+					<label for="body">Review</label>
+					<textarea name="body" required maxlength="1000" rows="4"></textarea>
+				</div>
+				<input type="hidden" name="unique_id" value="{{ unique_book['unique_id'] }}">
+				<div class="form-group">
+					<button type="submit" class="btn btn-primary">Submit Review</button>
+					<button type="button" onclick="document.querySelector('form').classList.add('hidden')" class="btn btn-secondary">Cancel</button>
+				</div>
+			</div>
+		</form>
+
+		<div class="container">
+			<h3>📢 Available Listings</h3>
+			{% if all_books %}
+				{% for book in all_books %}
+					<div class="ads">
+						<p><strong>👤 Posted by:</strong> {{ book['name'] }}</p>
+						<p><strong>📍 Location:</strong> {{ book['location'] }}</p>
+						<p><strong>📞 Contact:</strong> {{ book['contact_num'] }}</p>
+						<p><strong>📝 Description:</strong> {{ book['description'] }}</p>
+						<p><strong>📄 Pages:</strong> {{ book['page_count'] }}</p>
+						
+						{% if book['transaction_type'] == 1 %}
+							<p><strong>🤝 Available for:</strong> Borrowing/Lending</p>
+							<p><strong>💰 Daily Rate:</strong> ${{ book['price'] }}</p>
+							<p><strong>📅 Max Period:</strong> {{ book['num_of_days'] }} days</p>
+						{% elif book['transaction_type'] == 2 %}
+							<p><strong>💰 Available for:</strong> Buying/Selling</p>
+							<p><strong>💵 Price:</strong> ${{ book['price'] }}</p>
+						{% elif book['transaction_type'] == 3 %}
+							<p><strong>🔄 Available for:</strong> Exchange</p>
+							<p><strong>📋 Exchange Details:</strong> {{ book['exchange_with'] }}</p>
+						{% endif %}
+					</div>
+				{% endfor %}
+			{% else %}
+				<div class="ads">
+					<p><em>No listings available for this book at the moment.</em></p>
+					<p>Check back later or consider adding your own copy!</p>
+				</div>
+			{% endif %}
+		</div>
+		
+		<div class="text-center mt-4">
+			<a href="{{ url_for('home', name=session['name'], user_id=session['id']) }}" class="btn btn-secondary">← Back to Home</a>
+		</div>
+	</div>
+
+	<script src="{{ url_for('static', filename='ubook_page.js') }}"></script>
 </body>
 </html>

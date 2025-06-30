@@ -1,46 +1,50 @@
-let lendRadio = document.getElementById("lend")
-let sellRadio = document.getElementById("sell")
-let exchangeRadio = document.getElementById("exchange")
+// BookExchange - Add Book Form JavaScript
+// Handles dynamic form field updates based on transaction type selection
 
+document.addEventListener('DOMContentLoaded', function() {
+    const lendRadio = document.getElementById("lend");
+    const sellRadio = document.getElementById("sell");
+    const exchangeRadio = document.getElementById("exchange");
+    
+    // Check if elements exist before adding event listeners
+    if (!lendRadio || !sellRadio || !exchangeRadio) {
+        console.error('Transaction type radio buttons not found');
+        return;
+    }
 
-lendRadio.addEventListener("click", function() {
-	if (lendRadio.checked) {
-		console.log(lendRadio.value)
-	}
-	
-	document.querySelector(".price").innerHTML = '<label for="price"><b>Price</b></label> <input type="number" placeholder="Enter price" name="price" required> <br> <br>';
+    const priceContainer = document.querySelector(".price");
+    const numOfDaysContainer = document.querySelector(".num-of-days");
+    const exchangeDescContainer = document.querySelector(".exchange-description");
+    
+    if (!priceContainer || !numOfDaysContainer || !exchangeDescContainer) {
+        console.error('Form containers not found');
+        return;
+    }
 
-	document.querySelector(".num-of-days").innerHTML = '<label for="num-of-days"><b>No. of days</b></label> <input type="number" placeholder="Enter no. of days" name="num-of-days" required> <br>';
+    // Lending/Borrowing option
+    lendRadio.addEventListener("click", function() {
+        if (lendRadio.checked) {
+            priceContainer.innerHTML = '<div class="form-group"><label for="price"><b>Daily rental price ($)</b></label><input type="number" step="0.01" placeholder="Enter price per day" name="price" required min="0" max="999.99"></div>';
+            numOfDaysContainer.innerHTML = '<div class="form-group"><label for="num-of-days"><b>Maximum lending period (days)</b></label><input type="number" placeholder="Enter maximum days" name="num-of-days" required min="1" max="365"></div>';
+            exchangeDescContainer.innerHTML = "";
+        }
+    });
 
-	document.querySelector(".exchange-description").innerHTML = "";
+    // Selling/Buying option
+    sellRadio.addEventListener("click", function() {
+        if (sellRadio.checked) {
+            priceContainer.innerHTML = '<div class="form-group"><label for="price"><b>Selling price ($)</b></label><input type="number" step="0.01" placeholder="Enter selling price" name="price" required min="0" max="9999.99"></div>';
+            numOfDaysContainer.innerHTML = "";
+            exchangeDescContainer.innerHTML = "";
+        }
+    });
 
-});
-
-sellRadio.addEventListener("click", function() {
-	console.log("clicked on sell");
-	
-
-	if (sellRadio.checked) {
-		console.log(sellRadio.value)
-	}
-
-	document.querySelector(".price").innerHTML = '<label for="price"><b>Price</b></label> <input type="number" placeholder="Enter price" name="price" required> <br> <br>';
-
-	document.querySelector(".num-of-days").innerHTML = "";
-
-	document.querySelector(".exchange-description").innerHTML = "";
-
-});
-
-exchangeRadio.addEventListener("click", function() {
-	if (exchangeRadio.checked) {
-		console.log(exchangeRadio.value)
-		// lendRadio.style.display = "none";
-
-		document.querySelector(".price").innerHTML = "";
-
-		document.querySelector(".num-of-days").innerHTML = "";
-
-		document.querySelector(".exchange-description").innerHTML = '<label for="exchange-description"><b>Tell us briefly about the condition of the book and what you want to exchange it for</b></label> <input type="text" placeholder="Enter description" name="exchange-description" required> <br>';
-	}
+    // Exchange option
+    exchangeRadio.addEventListener("click", function() {
+        if (exchangeRadio.checked) {
+            priceContainer.innerHTML = "";
+            numOfDaysContainer.innerHTML = "";
+            exchangeDescContainer.innerHTML = '<div class="form-group"><label for="exchange-description"><b>Exchange description</b></label><textarea placeholder="Describe the condition of your book and what you want to exchange it for" name="exchange-description" required maxlength="500" rows="3"></textarea></div>';
+        }
+    });
 });

@@ -1,5 +1,21 @@
-let noneOfTheAbove = document.querySelector("#none");
+// BookExchange - Add Book Step 2 JavaScript
+// Handles showing/hiding genre input fields
 
-noneOfTheAbove.addEventListener("click", () => {
-	document.querySelector(".genres").style.display = "block";	
+document.addEventListener('DOMContentLoaded', function() {
+    const noneOfTheAbove = document.querySelector("#none");
+    const genresContainer = document.querySelector(".genres");
+    
+    if (!noneOfTheAbove) {
+        console.error('None of the above radio button not found');
+        return;
+    }
+    
+    if (!genresContainer) {
+        console.error('Genres container not found');
+        return;
+    }
+
+    noneOfTheAbove.addEventListener("click", function() {
+        genresContainer.classList.remove("hidden");
+    });
 });

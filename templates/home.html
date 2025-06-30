@@ -3,112 +3,67 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>BookExchange</title>
-	<link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
-	<style>
-		a:link, a:visited {
-		  background-color: #f44336;
-		  color: white;
-		  padding: 10px 20px;
-		  border-radius: 12px;
-		  text-align: center;
-		  text-decoration: none;
-		  display: inline-block;
-		  border: 2px solid black;
-		}
-
-		a:hover, a:active {
-		  background-color: red;
-		}
-		
-		.container {
-		  background-color: beige;
-		  float: right;
-		}
-		
-		.button {
-		  background-color: red;
-		  border: 2px solid black;
-		  border-radius: 12px;
-		  color: white;
-		  padding: 3px 12px;
-		  text-align: center;
-		  text-decoration-color: yellow;
-		  font-size: 10px;
-		  margin: 3px 1px;
-		  opacity: 0.6;
-		  transition: 0.3s;
-		  display: inline-block;
-		  text-decoration: none;
-		  cursor: pointer;
-		}
-		
-		.button:hover {
-		  opacity: 1;
-		}
-	</style>
+	<title>Home - BookExchange</title>
+	<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
 </head>
 <body>
-	<h1>BookExchange</h1>
-	<h2>Welcome, {{ name }}!</h2>
+	<div class="main-content">
+		<h1>📚 BookExchange</h1>
+		<h2>Welcome, {{ name }}! 👋</h2>
 
-	<div class="container">
-		<div class="searchbox">
-			<h2>Search</h2>
+		<div class="sidebar">
+			<div class="searchbox">
+				<h3>🔍 Search Books</h3>
+				<form action="{{ url_for('search') }}" method="GET">
+					<input class="searchbar" placeholder="Book Name" type="text" name="name">
+					<input class="searchbar" placeholder="Author Name" type="text" name="author">
+					<div class="form-group">
+						<label for="genre">Genre</label>
+						<select id="genre" name="genre" class="searchbar">
+							<option value="">All Genres</option>
+							{% for genre in available_genres %}
+								<option value="{{ genre['genre_name'] }}">{{ genre['genre_name'] }}</option>
+							{% endfor %}
+						</select>
+					</div>
+					<button class="btn btn-primary" type="submit">Search</button>
+				</form>
+			</div>
 			
-			<form action="{{ url_for('search') }}" method="GET">
-				<input class="searchbar" placeholder="Name" type="text" name="name">
-				<!-- <br><br> -->
-				<input class="searchbar" placeholder="Author" type="text" name="author">
-				<br><br>
-				<label>Genres</label>
-				 <select id = "genre" name="genre">
-					 <option value=""> </option>
-					 {% for genre in available_genres %}
-						<option value = "{{ genre['genre_name'] }}">{{ genre['genre_name'] }}</option>
+			<div class="promo">
+				<div class="promotion">
+					<h3>📖 Books Curated For You</h3>
+					{% for recommendation in recommendations %}
+						<a href="{{ url_for('search', name=recommendation['name']) }}">{{ recommendation['name'] }}</a>
 					{% endfor %}
-				 </select>
-				<br><br>
-				<button class="button" type="submit">Search</button>
-			</form>
+				</div>
+
+				<div class="promotion">
+					<h3>🔥 Most Preferred Genres</h3>
+					{% for genre in trending_genres %}
+						<a href="{{ url_for('search', genre=genre['genre_name']) }}">{{ genre['genre_name'] }}</a>
+					{% endfor %}
+				</div>
+			
+				<div class="promotion">
+					<h3>👥 Popular with {{ user_types[session['user_type']]|title }}s</h3>
+					{% for recommendation in user_type_recommendations %}
+						<a href="{{ url_for('search', genre=recommendation['genre_name']) }}">{{ recommendation['genre_name'] }}</a>
+					{% endfor %}
+				</div>
+			</div>	
 		</div>
-		<div class="promo">
-			<div class="recommendations promotion">
-				<h3>Books Curated For You</h3>
-				{% for recommendation in recommendations %}
-					<a href="{{ url_for('search', name = recommendation['name']) }}">{{ recommendation['name'] }}</a>
-					<br>
-				{% endfor %}
-			</div>
 
-			<div class="trending_genres promotion">
-				<h3>Most Preferred Genres</h3>
-				{% for genre in trending_genres %}
-					<a href="{{ url_for('search', genre = genre['genre_name']) }}">{{ genre['genre_name'] }}</a>
-					<br>
-				{% endfor %}
+		<div class="content-area">
+			<div class="links">
+				<h3>⚡ Quick Actions</h3>
+				<a href="{{ url_for('add_book') }}" class="btn btn-primary">📚 Add Book</a>
+				<a href="{{ url_for('my_books') }}" class="btn btn-primary">📖 My Books</a>
+				<a href="{{ url_for('preferences') }}" class="btn btn-secondary">⚙️ Manage Preferences</a>
+				<a href="{{ url_for('analytics') }}" class="btn btn-secondary">📊 Analytics</a>
+				<a href="{{ url_for('logout') }}" class="btn btn-danger">🚪 Logout</a>
 			</div>
-		
-			<div class="recommendations promotion">
-				<h3>Genres Preferred By Similar Users</h3>
-				{% for recommendation in user_type_recommendations %}
-					<a href="{{ url_for('search', genre = recommendation['genre_name']) }}">{{ recommendation['genre_name'] }}</a>
-					<br>
-				{% endfor %}
-			</div>
-		</div>	
-	</div>
-
-	<div class="links">
-		<a href="/addbook">Add Book</a>
-		<br>
-		<a href="/mybooks">My Books</a>
-		<br>
-		<a href="{{ url_for('preferences') }}">Manage Preferences</a>
-		<br>
-		<a href="{{ url_for('analytics') }}">Analytics</a>
-		<br>
-		<a href="/logout">Logout</a>	
+		</div>
 	</div>
 </body>
 </html>
