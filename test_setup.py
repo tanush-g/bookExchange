@@ -4,22 +4,30 @@ Test script to verify MySQL connection and database setup
 """
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 try:
-    import config
-    print("✅ Config module imported successfully")
-    print(f"   Host: {config.MYSQL_HOST}")
-    print(f"   User: {config.MYSQL_USER}")
-    print(f"   Database: {config.MYSQL_DB}")
-    print(f"   Password set: {'Yes' if config.MYSQL_PASSWORD else 'No - PLEASE SET YOUR MYSQL PASSWORD'}")
+    # Get configuration from environment variables
+    MYSQL_HOST = os.environ.get('MYSQL_HOST', 'localhost')
+    MYSQL_USER = os.environ.get('MYSQL_USER', 'root')
+    MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', '')
+    MYSQL_DB = os.environ.get('MYSQL_DB', 'bookexchange')
+    
+    print("✅ Environment variables loaded successfully")
+    print(f"   Host: {MYSQL_HOST}")
+    print(f"   User: {MYSQL_USER}")
+    print(f"   Database: {MYSQL_DB}")
+    print(f"   Password set: {'Yes' if MYSQL_PASSWORD else 'No - PLEASE SET YOUR MYSQL PASSWORD'}")
 except Exception as e:
-    print(f"❌ Error importing config: {e}")
+    print(f"❌ Error loading environment variables: {e}")
     sys.exit(1)
 
-if not config.MYSQL_PASSWORD:
-    print("\n🚨 IMPORTANT: Please set your MySQL password in config.py before running the app!")
-    print("   Update the MYSQL_PASSWORD variable with your MySQL root password.")
+if not MYSQL_PASSWORD:
+    print("\n🚨 IMPORTANT: Please set your MySQL password in the .env file before running the app!")
+    print("   Update the MYSQL_PASSWORD variable in the .env file with your MySQL root password.")
     sys.exit(1)
 
 try:
@@ -27,11 +35,11 @@ try:
     from flask_mysqldb import MySQL
     
     app = Flask(__name__)
-    app.config['MYSQL_HOST'] = config.MYSQL_HOST
-    app.config['MYSQL_USER'] = config.MYSQL_USER
-    app.config['MYSQL_PASSWORD'] = config.MYSQL_PASSWORD
-    app.config['MYSQL_DB'] = config.MYSQL_DB
-    app.config['MYSQL_CURSORCLASS'] = config.MYSQL_CURSORCLASS
+    app.config['MYSQL_HOST'] = MYSQL_HOST
+    app.config['MYSQL_USER'] = MYSQL_USER
+    app.config['MYSQL_PASSWORD'] = MYSQL_PASSWORD
+    app.config['MYSQL_DB'] = MYSQL_DB
+    app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
     
     mysql = MySQL(app)
     
@@ -62,6 +70,6 @@ except Exception as e:
     print(f"❌ Database connection failed: {e}")
     print("\nPlease check:")
     print("1. MySQL is running")
-    print("2. Your password is correct in config.py")
+    print("2. Your password is correct in the .env file")
     print("3. The 'bookexchange' database exists")
     sys.exit(1)
